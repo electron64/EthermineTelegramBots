@@ -29,11 +29,11 @@ import time
 TELEGRAMTOKEN = "YOUR_BOT_TOKEN_HERE"
 
 # get this url from ethermine -> json api section
-APIURL = "/api/miner_new/YOUR_ADDRESS_HERE"
+APIURL = "/miner/0x008C61CdCA2b33e733Ff19642c5260cBdA39f534/dashboard"
 
 # if number of active workers drop less than this number bot will notify you.
 # so if you have 3 rigs, WNUM should set to 3!
-WNUM = 3
+WNUM = 1
 
 # every X minutes bot will check that WNUM workers are up on ethermine
 # i suggest to set this to 30 minutes
@@ -57,13 +57,13 @@ logger = logging.getLogger(__name__)
 
 
 def checkWorkers(bot, job):
-    conn = http.client.HTTPSConnection("ethermine.org")
+    conn = http.client.HTTPSConnection("api.ethermine.org")
     conn.request("GET", APIURL)
     res = conn.getresponse()
     toSend = ""
     if res.status == 200:
         buf = json.loads(res.read().decode("utf-8"))
-        s = buf['minerStats']
+        s = buf['currentStatistics']
         activeWorkers = s['activeWorkers']
         if activeWorkers < WNUM:
             toSend = "WARNING: Seems like some of your workers are offline ({}/{})".format(
@@ -71,7 +71,7 @@ def checkWorkers(bot, job):
             for usr in ALLOWEDUSERID:
                 bot.send_message(usr, text=toSend)
     else:
-        toSend = "Unable to reach Ethermine: {}".format(res.reason)
+        toSend = "Unable to reach Ethermine.org: {}".format(res.reason)
         for usr in ALLOWEDUSERID:
             bot.send_message(usr, text=toSend)
 
